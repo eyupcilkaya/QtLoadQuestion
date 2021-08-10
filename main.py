@@ -1,6 +1,6 @@
 import sys
-
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFrame
+import time
+from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.uic import loadUi
 import pandas as pd
 import thread
@@ -18,20 +18,30 @@ class MainWindow(QMainWindow):
         self.theQuestion = "Tüm Sorular"
         self.devices = firebase_process.getDevices()
         self.loadQuestion()
-        self.send.clicked.connect(self.click)
-        thread.generateThread(obj, self.devices)
+        self.send.clicked.connect(self.sendQuestion)
+        self.finish.clicked.connect(self.runStateUpdate)
+        obj.runstate = True
         self.show()
 
-    def click(self):
+    # runState function includes stop thread process, clear database process and exit process
+    def runStateUpdate(self):
+        obj.runstate = False
+        time.sleep(1)
+        firebase_process.clearDatabase()
+        sys.exit()
+
+    # sendQuestion function checks options
+    def sendQuestion(self):
+        thread.generateThread(obj, self.devices)
         if (self.toDevice == "Tüm Cihazlar") & (self.theQuestion != "Tüm Sorular"):
             for device in self.devices:
                 obj.setQuestion(device, [self.df.iloc[int(self.theQuestion) - 1][0],
-                                                self.df.iloc[int(self.theQuestion) - 1][1],
-                                                self.df.iloc[int(self.theQuestion) - 1][2],
-                                                self.df.iloc[int(self.theQuestion) - 1][3],
-                                                self.df.iloc[int(self.theQuestion) - 1][4],
-                                                self.df.iloc[int(self.theQuestion) - 1][5],
-                                                self.df.iloc[int(self.theQuestion) - 1][6]])
+                                         self.df.iloc[int(self.theQuestion) - 1][1],
+                                         self.df.iloc[int(self.theQuestion) - 1][2],
+                                         self.df.iloc[int(self.theQuestion) - 1][3],
+                                         self.df.iloc[int(self.theQuestion) - 1][4],
+                                         self.df.iloc[int(self.theQuestion) - 1][5],
+                                         self.df.iloc[int(self.theQuestion) - 1][6]])
 
         elif (self.toDevice == "Tüm Cihazlar") & (self.theQuestion == "Tüm Sorular"):
             for device in self.devices:
@@ -45,24 +55,24 @@ class MainWindow(QMainWindow):
                                              self.df.iloc[i][6]])
 
         elif (self.toDevice != "Tüm Cihazlar") & (self.theQuestion == "Tüm Sorular"):
-
+            print("tüm sorular")
             for i in range(len(self.df)):
                 obj.setQuestion(self.toDevice, [self.df.iloc[i][0],
-                                         self.df.iloc[i][1],
-                                         self.df.iloc[i][2],
-                                         self.df.iloc[i][3],
-                                         self.df.iloc[i][4],
-                                         self.df.iloc[i][5],
-                                         self.df.iloc[i][6]])
+                                                self.df.iloc[i][1],
+                                                self.df.iloc[i][2],
+                                                self.df.iloc[i][3],
+                                                self.df.iloc[i][4],
+                                                self.df.iloc[i][5],
+                                                self.df.iloc[i][6]])
 
         else:
-            obj.setQuestion(self.toDevice, [self.df.iloc[int(self.theQuestion)-1][0],
-                                            self.df.iloc[int(self.theQuestion)-1][1],
-                                            self.df.iloc[int(self.theQuestion)-1][2],
-                                            self.df.iloc[int(self.theQuestion)-1][3],
-                                            self.df.iloc[int(self.theQuestion)-1][4],
-                                            self.df.iloc[int(self.theQuestion)-1][5],
-                                            self.df.iloc[int(self.theQuestion)-1][6]])
+            obj.setQuestion(self.toDevice, [self.df.iloc[int(self.theQuestion) - 1][0],
+                                            self.df.iloc[int(self.theQuestion) - 1][1],
+                                            self.df.iloc[int(self.theQuestion) - 1][2],
+                                            self.df.iloc[int(self.theQuestion) - 1][3],
+                                            self.df.iloc[int(self.theQuestion) - 1][4],
+                                            self.df.iloc[int(self.theQuestion) - 1][5],
+                                            self.df.iloc[int(self.theQuestion) - 1][6]])
 
     def loadQuestion(self):
         self.df = pd.read_excel("doc.xlsx")
@@ -78,7 +88,8 @@ class MainWindow(QMainWindow):
 
     def onActivatedQuestion(self, text):
 
-        if(text=="Tüm Sorular"):
+        if (text == "Tüm Sorular"):
+            self.theQuestion = text
             pass
         else:
             self.theQuestion = text
