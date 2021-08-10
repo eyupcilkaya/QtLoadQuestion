@@ -1,10 +1,7 @@
 import time
-
 import xlsxwriter
 from pyrebase import pyrebase
 import firebaseConfigFile
-import xlwt
-from xlwt import Workbook
 
 firebase = pyrebase.initialize_app(firebaseConfigFile.firebaseConfig)
 storage = firebase.storage()
@@ -20,15 +17,10 @@ def writeFirebase(obj, device):
     worksheet.write(0, deviceNum.index(device), str(device))
     while obj.runstate:
         questionarray = obj.getQuestion(device)
-        print(questionarray)
 
         if (db.child(f"state/{device}").get().val() == 0) & (len(questionarray) > i):
-            print(i)
 
             answer = db.child(f"answers/{device}").get().val()
-            print(answer)
-
-            print(deviceNum.index(device))
             worksheet.write(j, deviceNum.index(device), str(answer))
 
             db.child(f"questions/{device}/question").set(questionarray[i][0])
@@ -46,7 +38,6 @@ def writeFirebase(obj, device):
 
         else:
             time.sleep(0.5)
-    print("yes")
 
     answer = db.child(f"answers/{device}").get().val()
     worksheet.write(j, deviceNum.index(device), str(answer))
