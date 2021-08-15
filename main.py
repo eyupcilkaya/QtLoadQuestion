@@ -14,12 +14,19 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         loadUi("load.ui", self)
+
+        # toDevice and theQuestion variables are the selected item on combobox
         self.toDevice = "Tüm Cihazlar"
         self.theQuestion = "Tüm Sorular"
+
+        # get devices from database
         self.devices = firebase_process.getDevices()
+        # get question from excel and add combobox
         self.loadQuestion()
+        # send button and finish button connect to click method
         self.send.clicked.connect(self.sendQuestion)
         self.finish.clicked.connect(self.runStateUpdate)
+        # runstate variable is used for program close
         obj.runstate = True
         self.show()
 
@@ -30,7 +37,7 @@ class MainWindow(QMainWindow):
         firebase_process.clearDatabase()
         sys.exit()
 
-    # sendQuestion function checks options
+    # sendQuestion function checks options and start threads
     def sendQuestion(self):
         thread.generateThread(obj, self.devices)
         if (self.toDevice == "Tüm Cihazlar") & (self.theQuestion != "Tüm Sorular"):
@@ -74,6 +81,7 @@ class MainWindow(QMainWindow):
                                             self.df.iloc[int(self.theQuestion) - 1][5],
                                             self.df.iloc[int(self.theQuestion) - 1][6]])
 
+    # get question from excel and add combobox
     def loadQuestion(self):
         self.df = pd.read_excel("doc.xlsx")
         self.questionBox.addItem("Tüm Sorular")
@@ -82,7 +90,7 @@ class MainWindow(QMainWindow):
             self.questionBox.addItem(str(i + 1))
         for i in self.devices:
             self.deviceBox.addItem(str(i))
-
+        # combobox connect active item method
         self.questionBox.activated[str].connect(self.onActivatedQuestion)
         self.deviceBox.activated[str].connect(self.onActivatedDevice)
 
